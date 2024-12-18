@@ -72,9 +72,6 @@ def parse_args() -> argparse.Namespace:
         help="identifier of the application as UUID in RFC 4122",
     )
     parser.add_argument(
-        "--plaincode", action="store_true", help="unencrypted python web application"
-    )
-    parser.add_argument(
         "--timeout", type=int, help="seconds before closing the configuration server"
     )
     parser.add_argument(
