@@ -5,6 +5,7 @@ import asyncio
 import importlib
 import logging
 import shutil
+import ssl
 import sys
 import sysconfig
 import uuid
@@ -49,6 +50,11 @@ def parse_args() -> argparse.Namespace:
         type=str,
         default="0.0.0.0",
         help="hostname of the server",
+    )
+    parser.add_argument(
+        "--client-certificate",
+        type=str,
+        help="For client certificate authentication (PEM encoded)",
     )
     parser.add_argument("--port", type=int, default=443, help="port of the server")
     parser.add_argument(
@@ -237,6 +243,13 @@ def run() -> None:
         "worker_class": "uvloop",
         "wsgi_max_body_size": 2 * 1024 * 1024 * 1024,  # 2 GB
     }
+
+    if client_cert := args.client_certificate:
+        # this mode provides mandatory TLS client cert authentication
+        config_map["verify_mode"] = int(ssl.CERT_REQUIRED)
+        client_cert_path: Path = globs.KEY_DIR_PATH / "client.pem"
+        client_cert_path.write_text(client_cert)
+        config_map["ca_certs"] = f"{client_cert_path}"
 
     if ssl_app_mode == SslAppMode.CUSTOM_CERTIFICATE:
         config_map["certfile"] = args.certificate
