@@ -34,8 +34,9 @@ $ pip install cenclave-lib-sgx
 
 ```console
 $ cenclave-bootstrap --help
-usage: cenclave-bootstrap [-h] [--host HOST] [--port PORT] [--subject SUBJECT] [--san SAN] --app-dir
-                          APP_DIR --id ID [--plaincode] [--timeout TIMEOUT] [--version] [--debug]
+usage: cenclave-bootstrap [-h] [--host HOST] [--client-certificate CLIENT_CERTIFICATE] [--port PORT]
+                          [--subject SUBJECT] [--san SAN] --app-dir APP_DIR --id ID [--timeout TIMEOUT]
+                          [--version] [--debug]
                           (--ratls EXPIRATION_DATE | --no-ssl | --certificate CERTIFICATE_PATH)
                           application
 
@@ -47,21 +48,20 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --host HOST           hostname of the server
+  --client-certificate CLIENT_CERTIFICATE
+                        For client certificate authentication (PEM encoded)
   --port PORT           port of the server
   --subject SUBJECT     Subject as RFC 4514 string for the RA-TLS certificate
   --san SAN             Subject Alternative Name in the RA-TLS certificate
   --app-dir APP_DIR     path of the python web application
   --id ID               identifier of the application as UUID in RFC 4122
-  --plaincode           unencrypted python web application
   --timeout TIMEOUT     seconds before closing the configuration server
   --version             show program's version number and exit
   --debug               debug mode with more logging
   --ratls EXPIRATION_DATE
-                        generate a self-signed certificate for RA-TLS with a specific expiration date
-                        (Unix time)
+                        generate a self-signed certificate for RA-TLS with a specific expiration date (Unix time)
   --no-ssl              use HTTP without SSL
   --certificate CERTIFICATE_PATH
-                        custom certificate used for the SSL connection, private key must be sent through
-                        the configuration server
-
+                        custom certificate used for the SSL connection, private key must be sent through the
+                        configuration server
 ```
