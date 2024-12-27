@@ -293,7 +293,7 @@ def run() -> None:
             loop="uvloop",
             workers=1,
             ssl_certfile=cast(Path, config_map["certfile"]),
-            ssl_keyfile=cast(Path, config_map["keyfile"]),
+            ssl_keyfile=cast(str, f"{config_map['keyfile']}"),
             ssl_ca_certs=cast(str, config_map["ca_certs"]),
             ssl_cert_reqs=cast(int, config_map["verify_mode"]),
         )
