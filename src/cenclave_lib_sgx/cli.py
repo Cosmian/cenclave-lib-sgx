@@ -9,7 +9,7 @@ import ssl
 import sys
 import sysconfig
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
 from typing import cast
@@ -173,7 +173,7 @@ def run() -> None:
     else:
         # The conf server and the app server will use the same self-signed cert
         ssl_app_mode = SslAppMode.RATLS_CERTIFICATE
-        expiration_date = datetime.utcfromtimestamp(args.ratls)
+        expiration_date = datetime.fromtimestamp(args.ratls, tz=timezone.utc)
 
     logging.info("Generating self-signed certificate...")
 
