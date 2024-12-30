@@ -9,10 +9,12 @@ import ssl
 import sys
 import sysconfig
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from pathlib import Path
+from typing import cast
 
+import uvicorn
 from cenclave_lib_crypto.x25519 import x25519_pk_from_sk
 from cenclave_lib_crypto.xsalsa20_poly1305 import decrypt_directory
 from cryptography import x509
@@ -55,6 +57,13 @@ def parse_args() -> argparse.Namespace:
         "--client-certificate",
         type=str,
         help="For client certificate authentication (PEM encoded)",
+    )
+    parser.add_argument(
+        "--ssl-verify-mode",
+        type=int,
+        help="Either CERT_OPTIONAL (1) or CERT_REQUIRED (2). Default to CERT_REQUIRED.",
+        choices=[1, 2],
+        default=2,
     )
     parser.add_argument("--port", type=int, default=443, help="port of the server")
     parser.add_argument(
@@ -165,7 +174,7 @@ def run() -> None:
     else:
         # The conf server and the app server will use the same self-signed cert
         ssl_app_mode = SslAppMode.RATLS_CERTIFICATE
-        expiration_date = datetime.utcfromtimestamp(args.ratls)
+        expiration_date = datetime.fromtimestamp(args.ratls, tz=timezone.utc)
 
     logging.info("Generating self-signed certificate...")
 
@@ -245,8 +254,11 @@ def run() -> None:
     }
 
     if client_cert := args.client_certificate:
-        # this mode provides mandatory TLS client cert authentication
-        config_map["verify_mode"] = int(ssl.CERT_REQUIRED)
+        config_map["verify_mode"] = (
+            int(ssl.CERT_OPTIONAL)
+            if args.ssl_verify_mode == 1
+            else int(ssl.CERT_REQUIRED)
+        )
         client_cert_path: Path = globs.KEY_DIR_PATH / "client.pem"
         client_cert_path.write_text(client_cert)
         config_map["ca_certs"] = f"{client_cert_path}"
@@ -273,4 +285,18 @@ def run() -> None:
     application = getattr(importlib.import_module(module_name), application_name)
 
     logging.info("Starting the application (mode=%s)...", ssl_app_mode.name)
-    asyncio.run(serve(application, config))
+
+    if args.client_certificate:
+        uvicorn.run(
+            application,
+            host=f"{args.host}",
+            port=args.port,
+            loop="uvloop",
+            workers=1,
+            ssl_certfile=cast(Path, config_map["certfile"]),
+            ssl_keyfile=cast(str, f"{config_map['keyfile']}"),
+            ssl_ca_certs=cast(str, config_map["ca_certs"]),
+            ssl_cert_reqs=cast(int, config_map["verify_mode"]),
+        )
+    else:
+        asyncio.run(serve(application, config))

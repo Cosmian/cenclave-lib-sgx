@@ -18,9 +18,9 @@ The library is responsible for:
 The flow to run an encrypted Python web application is the following:
 
 1. A first self-signed HTTPS server using RA-TLS is launched waiting to receive a JSON payload with:
-   - UUID, a unique application identifier provided to `enclave-bootstrap` as an argument
+   - UUID, a unique application identifier provided to `cenclave-bootstrap` as an argument
    - the decryption key of the code
-   - Optionally the private key corresponding to the certificate provided to `enclave-bootstrap` (for *Custom* certificate)
+   - Optionally the private key corresponding to the certificate provided to `cenclave-bootstrap` (for *Custom* certificate)
 2. If the UUID and decryption key are the expected one, the configuration server is stopped, the code is decrypted and finally run as a new server
 
 
