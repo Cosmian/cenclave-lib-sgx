@@ -62,6 +62,7 @@ def parse_args() -> argparse.Namespace:
         "--ssl-verify-mode",
         type=int,
         help="Either CERT_OPTIONAL (1) or CERT_REQUIRED (2). Default to CERT_REQUIRED.",
+        choices=[1, 2],
         default=2,
     )
     parser.add_argument("--port", type=int, default=443, help="port of the server")
